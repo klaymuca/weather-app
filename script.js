@@ -12,8 +12,11 @@ searchButton.addEventListener("click", function() {
 
     cityName.textContent = city;
 
+    document.querySelector(".error-message").textContent = "";
+
     if (city === "") {
         document.querySelector(".error-message").textContent = "Please enter a city name.";
+        return;
     }
 
         fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1`)
@@ -21,6 +24,12 @@ searchButton.addEventListener("click", function() {
              return response.json();
             })
             .then(function(data) {
+
+                if(!data.results || data.results.length === 0) {
+                    document.querySelector(".error-message").textContent = "City not found. Please try again.";
+                    return;
+                }
+
                 const location = data.results[0];
 
                 const latitude = location.latitude;
@@ -33,6 +42,11 @@ searchButton.addEventListener("click", function() {
             
             fetch(weatherUrl)
                 .then(function(response) {
+
+                    if (!response.ok) {
+                        throw new Error("Weather data not found. Please try again.");
+                    }
+
                     return response.json();
                 })
                 .then(function(data) {
@@ -96,6 +110,12 @@ searchButton.addEventListener("click", function() {
                         weatherIcon.textContent = "❓";
                     }
 
+                })
+                .catch(function(error) {
+                    console.log(error);
+                    document.querySelector(".error-message").textContent = "Something went wrong. Please try again.";
                 });
-            });
+            
         });
+
+});
